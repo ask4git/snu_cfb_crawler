@@ -26,6 +26,7 @@ class Gene:
         self.gene_name = ''
         self.gene_sub_names = []
         self.pathway = []
+        self.disease = []
         self.structure = []
         self.sequence = ''
 
@@ -56,6 +57,14 @@ class Gene:
             pathway_id = pathway.find('a').string
             pathway_name = pathway.find_all('td')[1].string
             self.pathway.append(':'.join([pathway_id, pathway_name]))
+
+    # Disease
+    def __set_disease(self, tr_tag):
+        diseases = tr_tag.find_all('table')
+        for disease in diseases:
+            disease_id = disease.find('a').string
+            disease_name = disease.find_all('td')[1].string
+            self.disease.append(':'.join([disease_id, disease_name]))
 
     # Structure
     def __set_structure(self, tr_tag):
@@ -91,6 +100,8 @@ class Gene:
                 self.__set_gene_name(tr_tag)
             elif title == 'Pathway':
                 self.__set_pathway(tr_tag)
+            elif title == 'Disease':
+                self.__set_disease(tr_tag)
             elif title == 'Structure':
                 self.__set_structure(tr_tag)
             elif title == 'AA seq':
@@ -101,9 +112,11 @@ class Gene:
         _gene_name = self.gene_name or '_'
         _gene_sub_name = '::'.join(self.gene_sub_names) or '_'
         _pathway = '::'.join(self.pathway) or '_'
+        _disease = '::'.join(self.disease) or '_'
         _structure = '::'.join(self.structure) or '_'
         _sequence = self.sequence or '_'
-        return '\t'.join([_entry, _gene_name, _gene_sub_name, _pathway, _structure, _sequence])
+
+        return '\t'.join([_entry, _gene_name, _gene_sub_name, _pathway, _disease, _structure, _sequence])
 
 
 class EntryNotFoundError(Exception):

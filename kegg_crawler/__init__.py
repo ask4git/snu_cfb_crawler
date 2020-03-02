@@ -51,7 +51,7 @@ def gene_crawler(url):
         html = BeautifulSoup(res.content, 'html.parser')
         serialized_data = Gene(url, html).serialize()
         print(url, serialized_data)
-        with open('kegg_gene_result.tsv', 'a') as out_file:
+        with open('result_data/kegg_gene_result.tsv', 'a') as out_file:
             print(serialized_data, file=out_file)
 
     except Exception as error:
@@ -59,7 +59,7 @@ def gene_crawler(url):
         logging.error(traceback.format_exc())  # logging
 
 
-def multi_threading_crawling(processes, urls):
+def multi_threading_gene_crawling(processes, urls):
     pool = multiprocessing.Pool(processes=processes)
     pool.map(gene_crawler, urls)
     pool.close()
