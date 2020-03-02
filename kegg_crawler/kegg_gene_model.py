@@ -13,13 +13,14 @@ def remove_tag(content):
 
 
 class Gene:
-    def __init__(self, html):
-        self.__initialize(html)
+    def __init__(self, url, html):
+        self.__initialize(url, html)
         self.__set_entry()
         self.__crawling_body()
 
     # Initialize
-    def __initialize(self, html):
+    def __initialize(self, url, html):
+        self.__url = url
         self.__html = html
         self.entry = ''
         self.gene_name = ''
@@ -30,7 +31,16 @@ class Gene:
 
     # Entry
     def __set_entry(self):
-        self.entry = self.__html.find('font', {'class': 'title1'}).string.split(':')[1].strip()
+        try:
+            font_title = self.__html.find('font', {'class': 'title1'})
+
+            if not font_title:
+                raise EntryNotFoundError('Can\'t find entry data.')
+            self.entry = font_title.string.split(':')[1].strip()
+
+        except EntryNotFoundError as error:
+            print(self.__url)
+            print(error)
 
     # Gene name
     def __set_gene_name(self, tr_tag):
@@ -45,7 +55,7 @@ class Gene:
         for pathway in pathways:
             pathway_id = pathway.find('a').string
             pathway_name = pathway.find_all('td')[1].string
-            self.pathway.append('::'.join([pathway_id, pathway_name]))
+            self.pathway.append(':'.join([pathway_id, pathway_name]))
 
     # Structure
     def __set_structure(self, tr_tag):
@@ -62,9 +72,17 @@ class Gene:
 
     def __crawling_body(self):
         # Gene 페이지마다 class 명칭이 다른 경우가 종종 있음
-        tbody_class_names = ['fr1', 'fr3']
-        tbody = self.__html.find('td', {"class": tbody_class_names[0]})
-        tr_tags = tbody.find_all_next('tr')
+        try:
+            tbody_class_names = ['fr1', 'fr3']
+            tbody = self.__html.find('td', {"class": tbody_class_names[0]})
+            if tbody:
+                tr_tags = tbody.find_all_next('tr')
+            else:
+                raise TBodyNotFound('Can\'t find entry data.')
+        except TBodyNotFound as error:
+            print(self.__url)
+            print(error)
+            return None
 
         for tr_tag in tr_tags:
             title = remove_tag(str(tr_tag.find('nobr')))
@@ -81,8 +99,24 @@ class Gene:
     def serialize(self):
         _entry = self.entry or '_'
         _gene_name = self.gene_name or '_'
-        _gene_sub_name = ':'.join(self.gene_sub_names) or '_'
-        _pathway = ':'.join(self.pathway) or '_'
-        _structure = ':'.join(self.structure) or '_'
+        _gene_sub_name = '::'.join(self.gene_sub_names) or '_'
+        _pathway = '::'.join(self.pathway) or '_'
+        _structure = '::'.join(self.structure) or '_'
         _sequence = self.sequence or '_'
         return '\t'.join([_entry, _gene_name, _gene_sub_name, _pathway, _structure, _sequence])
+
+
+class EntryNotFoundError(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return f'[{self.__class__.__name__}'
+
+
+class TBodyNotFound(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return f'{self.__class__.__name__}'
