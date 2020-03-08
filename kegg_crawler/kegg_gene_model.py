@@ -47,8 +47,9 @@ class Gene:
     def __set_gene_name(self, tr_tag):
         genes = remove_tag(tr_tag.find('div')).split(',')
         for gene_index, gene in enumerate(genes):
-            self.gene_name = gene.strip() if gene_index == 0 \
-                else self.gene_sub_names.append(gene.strip())
+            if gene_index == 0:
+                self.gene_name = gene.strip()
+            self.gene_sub_names.append(gene.strip())
 
     # Pathway
     def __set_pathway(self, tr_tag):
@@ -108,6 +109,7 @@ class Gene:
                 self.__set_sequence(tr_tag)
 
     def serialize(self):
+        _url = self.__url or '_'
         _entry = self.entry or '_'
         _gene_name = self.gene_name or '_'
         _gene_sub_name = '::'.join(self.gene_sub_names) or '_'
@@ -116,7 +118,7 @@ class Gene:
         _structure = '::'.join(self.structure) or '_'
         _sequence = self.sequence or '_'
 
-        return '\t'.join([_entry, _gene_name, _gene_sub_name, _pathway, _disease, _structure, _sequence])
+        return '\t'.join([_url, _entry, _gene_name, _gene_sub_name, _pathway, _disease, _structure, _sequence])
 
 
 class EntryNotFoundError(Exception):

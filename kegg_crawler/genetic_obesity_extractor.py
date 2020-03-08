@@ -8,8 +8,6 @@ import csv
 
 index_of_disease = 4
 genetic_obesity = 'H02106:Genetic obesity'
-path_in_file = '/Users/ask4git/Desktop/kegg_gene_result.tsv'
-path_out_file = '/Users/ask4git/Desktop/kegg_gene_result_postprocessed.tsv'
 
 
 def extractor(path_in, path_out):
